@@ -1,10 +1,17 @@
 #pragma once
 
-    enum inputId
+    enum class InputId
     {
         ESCAPE,
         FORWARD,
         BACK,
         LEFT,
-        RIGHT
+        RIGHT,
+        CURSOR,
+        JOYSTICK0_A,
+        JOYSTICK0_B,
+        AXIS,
+        HAT
     };
+
+    void initInput(InputManager<InputId>& inputManager);
