@@ -17,11 +17,9 @@
     };
 
     /**
-     * @brief Input manager for easyer use of input
-     * 
-     * @tparam T is the type of id key
+     * @brief Input manager
+     *
      */
-    template <typename T = int>
     class InputManager
     {
     private:
@@ -42,23 +40,14 @@
             bool isReleased;
         };
         GLFWwindow* _window;
-        std::unordered_map<T,Input> _inputList;
+        std::unordered_multimap<std::string,Input> _inputList;
 
         static void joystickCallBack(int jid, int event)
         {
             if(event == GLFW_CONNECTED)
-            {
-                /*if(glfwJoystickIsGamepad(jid))
-                    _isJoystickXbox.insert({jid,true});
-                else
-                    _isJoystickXbox.insert({jid,false});*/
                 std::cout << "Controller " << jid << " connected" << std::endl;
-            }
             else if(event == GLFW_DISCONNECTED)
-            {
-                //_isJoystickXbox.erase(jid);
                 std::cout << "Controller " << jid << " disconnected" << std::endl;
-            }
         }
 
         bool getInputPressed(const Input& input)
@@ -110,7 +99,7 @@
          * @param key GLFW_KEY input
          * @param detectionType Type of input
          */
-        void addKeyInput(T id, int key, ImEnumDetectionType detectionType)
+        void addKeyInput(std::string id, int key, ImEnumDetectionType detectionType)
         {
             _inputList.insert({id,{detectionType,InputType::KEY,key,-1,false,true}});
         }
@@ -122,7 +111,7 @@
          * @param key GLFW_MOUSE input
          * @param detectionType Type of input
          */
-        void addMouseInput(T id, int key, ImEnumDetectionType detectionType)
+        void addMouseInput(std::string id, int key, ImEnumDetectionType detectionType)
         {
             _inputList.insert({id,{detectionType,InputType::MOUSE,key,-1,false,true}});
         }
@@ -135,7 +124,7 @@
          * @param key GLFW_MOUSE input
          * @param detectionType Type of input
          */
-        void addControllerInput(T id, int glfwJoystick, int key, ImEnumDetectionType detectionType)
+        void addControllerInput(std::string id, int glfwJoystick, int key, ImEnumDetectionType detectionType)
         {
             _inputList.insert({id,{detectionType,InputType::CONTROLLER,key,glfwJoystick,false,true}});
         }
@@ -193,12 +182,19 @@
          * @param id the id of input
          * @return true if the input id is pressed, false instead
          */
-        bool isPressed(T id)
+        bool isPressed(std::string id)
         {
-            Input& input = _inputList.at(id);
-            bool isPressed = input.isPressed;
+            auto found = _inputList.find(id);
+            for(auto i = found; i != _inputList.end(); ++i)
+            {
+                if(i->first != id)
+                    break;
 
-            return isPressed;
+                if(i->second.isPressed)
+                    return true;
+            }
+
+            return false;
         }
 
         /**
@@ -207,9 +203,19 @@
          * @param id the id of input
          * @return true if the input id is released, flase instead
          */
-        bool isReleased(T id)
+        bool isReleased(std::string id)
         {
-            return _inputList.at(id).isReleased;
+            auto found = _inputList.find(id);
+            for(auto i = found; i != _inputList.end(); ++i)
+            {
+                if(i->first != id)
+                    break;
+
+                if(i->second.isReleased)
+                    return true;
+            }
+
+            return false;
         }
 
         /**
